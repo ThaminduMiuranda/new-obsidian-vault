@@ -53,5 +53,14 @@
       ],
       "key": "E"
     }
+  ],
+  "paper_importer:import_pdf_from_arxiv": [
+    {
+      "modifiers": [
+        "Alt",
+        "Mod"
+      ],
+      "key": "I"
+    }
   ]
 }

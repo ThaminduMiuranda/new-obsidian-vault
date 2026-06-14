@@ -2,6 +2,10 @@
   "cssTheme": "AnuPpuccin",
   "accentColor": "",
   "theme": "moonstone",
-  "baseFontSizeAction": false,
-  "enabledCssSnippets": []
+  "baseFontSizeAction": true,
+  "enabledCssSnippets": [],
+  "interfaceFontFamily": "Times New Roman",
+  "textFontFamily": "",
+  "nativeMenus": false,
+  "baseFontSize": 16
 }
