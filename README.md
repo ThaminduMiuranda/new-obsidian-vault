@@ -9,8 +9,11 @@ of starting from Obsidian's defaults.
 
 ## Usage
 
+This is a private repo, not published to the npm registry, so install it
+via the `github:` specifier:
+
 ```sh
-npx new-obsidian-vault <path>
+npx github:ThaminduMiuranda/new-obsidian-vault <path>
 ```
 
 With no `--config`, defaults to the `config` branch of this same repo
@@ -20,14 +23,14 @@ With no `--config`, defaults to the `config` branch of this same repo
 To use your own config repo/branch instead:
 
 ```sh
-npx new-obsidian-vault <path> --config <git-url> [--branch <name>]
+npx github:ThaminduMiuranda/new-obsidian-vault <path> --config <git-url> [--branch <name>]
 ```
 
 or set it once via an environment variable:
 
 ```sh
 export OBSIDIAN_VAULT_CONFIG_REPO=git@github.com:you/obsidian-config.git
-npx new-obsidian-vault ~/Notes/MyVault
+npx github:ThaminduMiuranda/new-obsidian-vault ~/Notes/MyVault
 ```
 
 Safe to run either before or after creating the vault in Obsidian's own
