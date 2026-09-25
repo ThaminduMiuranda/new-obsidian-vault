@@ -47,6 +47,31 @@ UI — if a default `.obsidian` folder already exists, it's backed up
 6. Commits.
 7. Opens the vault in Obsidian.
 
+### Bringing an existing vault to another machine
+
+Once a vault created by this tool is pushed to its own GitHub repo, don't
+clone it with a plain `git clone` or `gh repo clone` — those don't fetch
+submodule contents, so `.obsidian` comes down as an **empty folder**.
+Obsidian will then happily write a fresh set of defaults into that empty
+folder instead of erroring, which looks like your shared config silently
+didn't apply.
+
+Clone with submodules included:
+
+```sh
+git clone --recurse-submodules <your-vault-repo-url>
+```
+
+If you already cloned it plain and Obsidian already wrote defaults into
+the empty `.obsidian`, quit Obsidian fully first, then:
+
+```sh
+rm -rf .obsidian            # PowerShell: Remove-Item -Recurse -Force .obsidian
+git submodule update --init --recursive
+```
+
+then reopen the vault.
+
 ### Setting up a config repo
 
 Your config repo is just a git repo whose root looks like an
