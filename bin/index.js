@@ -72,13 +72,24 @@ function ask(question) {
 // obsidian://open?path=... only resolves vaults Obsidian already knows about
 // (from its own vault registry). A brand-new vault isn't in that list yet,
 // so register it ourselves before firing the URI.
-function registerVaultLinux(vaultPath) {
-  const candidates = [
-    path.join(os.homedir(), ".var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json"),
-    path.join(os.homedir(), ".config/obsidian/obsidian.json"),
-    path.join(os.homedir(), "snap/obsidian/current/.config/obsidian/obsidian.json"),
+function obsidianConfigCandidates() {
+  const home = os.homedir();
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA || path.join(home, "AppData", "Roaming");
+    return [path.join(appData, "obsidian", "obsidian.json")];
+  }
+  if (process.platform === "darwin") {
+    return [path.join(home, "Library", "Application Support", "obsidian", "obsidian.json")];
+  }
+  return [
+    path.join(home, ".var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json"),
+    path.join(home, ".config/obsidian/obsidian.json"),
+    path.join(home, "snap/obsidian/current/.config/obsidian/obsidian.json"),
   ];
-  const configPath = candidates.find((p) => fs.existsSync(p));
+}
+
+function registerVault(vaultPath) {
+  const configPath = obsidianConfigCandidates().find((p) => fs.existsSync(p));
   if (!configPath) return false;
 
   let data;
@@ -158,19 +169,44 @@ async function main() {
     }
   }
 
-  if (process.platform === "linux") {
-    try {
-      registerVaultLinux(vaultPath);
-    } catch {
-      // best-effort; URI open below still works for already-known vaults
-    }
+  try {
+    registerVault(vaultPath);
+  } catch {
+    // best-effort; URI open below still works for already-known vaults
   }
 
   const uri = `obsidian://open?path=${encodeURIComponent(vaultPath)}`;
-  const opener = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
   console.log(`\nOpening vault in Obsidian...`);
+  openUri(uri);
+}
+
+// Cross-platform "open this URI" that never crashes the process.
+// spawn() failures (e.g. missing binary) surface as an async 'error'
+// event, not a thrown exception, so a try/catch around spawn() alone
+// does not catch them — an explicit listener is required.
+function openUri(uri) {
+  let command, args, opts;
+  if (process.platform === "darwin") {
+    command = "open";
+    args = [uri];
+    opts = { stdio: "ignore", detached: true };
+  } else if (process.platform === "win32") {
+    // `start` is a cmd.exe builtin, not an executable — must go through cmd /c.
+    // The empty "" is the (unused) window title `start` expects as its first arg.
+    command = "cmd";
+    args = ["/c", "start", "", uri];
+    opts = { stdio: "ignore", detached: true, windowsHide: true };
+  } else {
+    command = "xdg-open";
+    args = [uri];
+    opts = { stdio: "ignore", detached: true };
+  }
+
   try {
-    const child = spawn(opener, [uri], { stdio: "ignore", detached: true });
+    const child = spawn(command, args, opts);
+    child.on("error", () => {
+      console.log(`Could not auto-open. Open manually: ${uri}`);
+    });
     child.unref();
   } catch {
     console.log(`Could not auto-open. Open manually: ${uri}`);
