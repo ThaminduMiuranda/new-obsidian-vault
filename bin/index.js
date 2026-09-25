@@ -56,6 +56,10 @@ async function main() {
     console.error("Missing config repo. Pass --config <git-url> or set OBSIDIAN_VAULT_CONFIG_REPO.\n");
     usage(1);
   }
+  if (config.startsWith("-")) {
+    console.error(`Refusing config repo starting with '-': ${config}\nThis would be parsed as a git option, not a URL.`);
+    process.exit(1);
+  }
 
   const vaultPath = path.resolve(rawPath);
   const repoName = repoNameArg || path.basename(vaultPath);
@@ -86,7 +90,7 @@ async function main() {
     path.join(vaultPath, ".gitignore"),
     ".obsidian/workspace.json\n.obsidian/workspace-mobile.json\n.trash/\n"
   );
-  gitInherit(["submodule", "add", "-b", "main", config, ".obsidian"], vaultPath);
+  gitInherit(["submodule", "add", "-b", "main", "--", config, ".obsidian"], vaultPath);
   gitInherit(["add", ".gitignore", ".gitmodules", ".obsidian"], vaultPath);
   gitInherit(["commit", "-m", "init: vault with shared obsidian config"], vaultPath);
 
