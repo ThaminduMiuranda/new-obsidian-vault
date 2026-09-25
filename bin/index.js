@@ -2,7 +2,9 @@
 "use strict";
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
+const crypto = require("crypto");
 const { execFileSync, spawn } = require("child_process");
 const readline = require("readline");
 
@@ -67,6 +69,33 @@ function ask(question) {
   return new Promise((resolve) => rl.question(question, (answer) => { rl.close(); resolve(answer); }));
 }
 
+// obsidian://open?path=... only resolves vaults Obsidian already knows about
+// (from its own vault registry). A brand-new vault isn't in that list yet,
+// so register it ourselves before firing the URI.
+function registerVaultLinux(vaultPath) {
+  const candidates = [
+    path.join(os.homedir(), ".var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json"),
+    path.join(os.homedir(), ".config/obsidian/obsidian.json"),
+    path.join(os.homedir(), "snap/obsidian/current/.config/obsidian/obsidian.json"),
+  ];
+  const configPath = candidates.find((p) => fs.existsSync(p));
+  if (!configPath) return false;
+
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  } catch {
+    return false;
+  }
+  data.vaults = data.vaults || {};
+  if (Object.values(data.vaults).some((v) => v.path === vaultPath)) return true;
+
+  const id = crypto.randomBytes(8).toString("hex");
+  data.vaults[id] = { path: vaultPath, ts: Date.now() };
+  fs.writeFileSync(configPath, JSON.stringify(data));
+  return true;
+}
+
 async function main() {
   const { config, branch, positional } = parseArgs(process.argv.slice(2));
   const [rawPath, repoNameArg] = positional;
@@ -126,6 +155,14 @@ async function main() {
       console.log(`Deleted ${path.basename(backupDir)}`);
     } else {
       console.log(`Kept ${path.basename(backupDir)}`);
+    }
+  }
+
+  if (process.platform === "linux") {
+    try {
+      registerVaultLinux(vaultPath);
+    } catch {
+      // best-effort; URI open below still works for already-known vaults
     }
   }
 
