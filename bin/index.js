@@ -6,6 +6,11 @@ const path = require("path");
 const { execFileSync, spawn } = require("child_process");
 const readline = require("readline");
 
+// Default shared config: the `config` branch of this same repo.
+// Override with --config (and optionally --branch) to use your own.
+const DEFAULT_CONFIG_REPO = "git@github.com:ThaminduMiuranda/new-obsidian-vault.git";
+const DEFAULT_CONFIG_BRANCH = "config";
+
 function usage(exitCode) {
   const msg = `
 new-obsidian-vault <path> [github-repo-name]
@@ -17,6 +22,10 @@ opens the vault in Obsidian.
 Options:
   --config <git-url>   Git URL of your shared .obsidian config repo.
                         (or set OBSIDIAN_VAULT_CONFIG_REPO)
+                        Defaults to ${DEFAULT_CONFIG_REPO}
+  --branch <name>       Branch of the config repo to use.
+                        Defaults to "${DEFAULT_CONFIG_BRANCH}" for the default
+                        config repo, "main" otherwise.
   -h, --help            Show this help.
 
 Example:
@@ -27,14 +36,25 @@ Example:
 }
 
 function parseArgs(argv) {
-  const args = { config: process.env.OBSIDIAN_VAULT_CONFIG_REPO || null, positional: [] };
+  const args = {
+    config: process.env.OBSIDIAN_VAULT_CONFIG_REPO || null,
+    branch: null,
+    positional: [],
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "-h" || a === "--help") usage(0);
     else if (a === "--config") args.config = argv[++i];
     else if (a.startsWith("--config=")) args.config = a.slice("--config=".length);
+    else if (a === "--branch") args.branch = argv[++i];
+    else if (a.startsWith("--branch=")) args.branch = a.slice("--branch=".length);
     else args.positional.push(a);
   }
+  if (!args.config) {
+    args.config = DEFAULT_CONFIG_REPO;
+    if (!args.branch) args.branch = DEFAULT_CONFIG_BRANCH;
+  }
+  if (!args.branch) args.branch = "main";
   return args;
 }
 
@@ -48,16 +68,16 @@ function ask(question) {
 }
 
 async function main() {
-  const { config, positional } = parseArgs(process.argv.slice(2));
+  const { config, branch, positional } = parseArgs(process.argv.slice(2));
   const [rawPath, repoNameArg] = positional;
 
   if (!rawPath) usage(1);
-  if (!config) {
-    console.error("Missing config repo. Pass --config <git-url> or set OBSIDIAN_VAULT_CONFIG_REPO.\n");
-    usage(1);
-  }
   if (config.startsWith("-")) {
     console.error(`Refusing config repo starting with '-': ${config}\nThis would be parsed as a git option, not a URL.`);
+    process.exit(1);
+  }
+  if (branch.startsWith("-")) {
+    console.error(`Refusing branch starting with '-': ${branch}\nThis would be parsed as a git option, not a branch name.`);
     process.exit(1);
   }
 
@@ -90,7 +110,7 @@ async function main() {
     path.join(vaultPath, ".gitignore"),
     ".obsidian/workspace.json\n.obsidian/workspace-mobile.json\n.trash/\n"
   );
-  gitInherit(["submodule", "add", "-b", "main", "--", config, ".obsidian"], vaultPath);
+  gitInherit(["submodule", "add", "-b", branch, "--", config, ".obsidian"], vaultPath);
   gitInherit(["add", ".gitignore", ".gitmodules", ".obsidian"], vaultPath);
   gitInherit(["commit", "-m", "init: vault with shared obsidian config"], vaultPath);
 
