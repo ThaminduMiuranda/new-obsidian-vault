@@ -1,0 +1,29 @@
+{
+  "name": "new-obsidian-vault",
+  "version": "1.0.0",
+  "description": "Create an Obsidian vault wired to a shared, git-synced config (submodule), then open it in Obsidian.",
+  "bin": {
+    "new-obsidian-vault": "bin/index.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "obsidian",
+    "vault",
+    "git",
+    "sync",
+    "cli"
+  ],
+  "author": "Thamindu Miuranda",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThaminduMiuranda/new-obsidian-vault.git"
+  }
+}
