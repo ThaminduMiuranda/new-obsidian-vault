@@ -10,10 +10,20 @@ of starting from Obsidian's defaults.
 ## Usage
 
 ```sh
-npx new-obsidian-vault <path> --config <git-url-of-your-config-repo>
+npx new-obsidian-vault <path>
 ```
 
-or set the config repo once via an environment variable:
+With no `--config`, defaults to the `config` branch of this same repo
+(the CLI code lives on `main`, the shared `.obsidian` settings live on
+`config` — one repo, one place to invite collaborators).
+
+To use your own config repo/branch instead:
+
+```sh
+npx new-obsidian-vault <path> --config <git-url> [--branch <name>]
+```
+
+or set it once via an environment variable:
 
 ```sh
 export OBSIDIAN_VAULT_CONFIG_REPO=git@github.com:you/obsidian-config.git
