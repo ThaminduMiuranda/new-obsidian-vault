@@ -4,5 +4,7 @@
   "attachmentFolderPath": "/",
   "trashOption": "system",
   "strictLineBreaks": true,
-  "showLineNumber": false
+  "showLineNumber": false,
+  "readableLineLength": true,
+  "showInlineTitle": true
 }

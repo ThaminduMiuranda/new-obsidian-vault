@@ -17,7 +17,7 @@
       "template": "📖"
     }
   ],
-  "defaultDisplayTextFormatIndex": 0,
+  "defaultDisplayTextFormatIndex": 2,
   "syncDisplayTextFormat": true,
   "syncDefaultDisplayTextFormat": true,
   "copyCommands": [
@@ -94,7 +94,7 @@
   "singleMDLeafInSidebar": true,
   "alwaysUseSidebar": true,
   "ignoreExistingMarkdownTabIn": [],
-  "defaultColorPaletteActionIndex": 4,
+  "defaultColorPaletteActionIndex": 3,
   "syncColorPaletteAction": true,
   "syncDefaultColorPaletteAction": true,
   "proxyMDProperty": "PDF",
@@ -207,8 +207,8 @@
   "useCallout": true,
   "calloutType": "PDF",
   "calloutIcon": "highlighter",
-  "highlightBacklinksInEmbed": false,
-  "highlightBacklinksInHoverPopover": false,
+  "highlightBacklinksInEmbed": true,
+  "highlightBacklinksInHoverPopover": true,
   "highlightBacklinksInCanvas": true,
   "clickPDFInternalLinkWithModifierKey": true,
   "clickOutlineItemWithModifierKey": true,
@@ -219,7 +219,7 @@
   "blankLineAboveAppendedContent": true,
   "autoCopy": true,
   "autoFocus": false,
-  "autoPaste": true,
+  "autoPaste": false,
   "autoFocusTarget": "last-active-and-open",
   "autoPasteTarget": "last-active-and-open-then-last-paste",
   "openAutoFocusTargetIfNotOpened": true,
